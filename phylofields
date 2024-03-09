@@ -1,0 +1,23 @@
+phylofields<-function(pam,phylo,nullmodel){
+  require(ape)
+  require(picante)
+prab<-pam$Presence_and_Absence_Matrix[,-c(1,2)]
+dfx<-data.frame()
+for(i in 1:length(colnames(prab))){
+ spt<-colnames(prab)[i]
+  locs<-which(prab[,i]==1)
+  if(length(locs)!=1){spf<-names(which(colSums(prab[locs,])!=0))}else{spf<-names(which(prab[locs,]!=0))}
+  spt1<-gsub(" ","_",spt)
+  spf1<-gsub(" ", "_",spf)
+  if(length(spf1)==1){print(paste0(spt," is unique"))}else{
+  spf1<-spf1[-which(spf1==spt1)]
+spfdf<-data.frame(spt1,spf1)
+dfx<-rbind(dfx,spfdf)}
+}
+tfx<-table(dfx)
+tfx1<-as.matrix(tfx)
+tt<-match.phylo.comm(phylo,tfx)
+sesmpd<-ses.mpd(samp=tt$comm,dis=cophenetic(tt$phy))
+fields<-data.frame(focalsp=gsub("_"," ",row.names(sesmpd)),NRI=(sesmpd$mpd.obs.z)*-1,coexist=sesmpd$ntaxa)
+return(fields)
+}
